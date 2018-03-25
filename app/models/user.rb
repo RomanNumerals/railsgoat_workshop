@@ -42,17 +42,18 @@ class User < ApplicationRecord
     auth = nil
     user = find_by_email(email)
     raise "#{email} doesn't exist!" if !(user)
-    if user.password == Digest::MD5.hexdigest(password)
-      auth = user
+    if user and user.password_hash == BCrypt::Engine.hex_secret(password, user.password_salt)
+      user
     else
-      raise "Incorrect Password!"
+      raise "Invalid Credentials Supplied!"
     end
     return auth
   end
 
   def hash_password
-    if will_save_change_to_password?
-      self.password = Digest::MD5.hexdigest(self.password)
+    if self.password.present?
+      self.password_salt = BCrypt::Engine.generate_salt
+      self.password_hash = BCrypt::Engine.hash_secret(self.passowrd, self.password_salt)
     end
   end
 
