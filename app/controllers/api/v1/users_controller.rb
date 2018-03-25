@@ -7,11 +7,15 @@ class Api::V1::UsersController < ApplicationController
   respond_to :json
 
   def index
-    respond_with @user.admin ? User.all : @user
+    respond_with @user.admin ? User.all.as_json : @user.as_json
   end
 
   def show
     respond_with @user.as_json
+  end
+
+  def as_json
+    super(only: [:id, :email, :first_name, :last_name])
   end
 
   private
