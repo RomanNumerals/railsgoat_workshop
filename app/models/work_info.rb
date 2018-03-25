@@ -2,7 +2,7 @@
 class WorkInfo < ApplicationRecord
   belongs_to :user
   has_one :key_management, foreign_key: :user_id, primary_key: :user_id, dependent: :destroy
-  #before_save :encrypt_ssn
+  before_save :encrypt_ssn
 
   # We should probably use this
   def last_four
@@ -21,18 +21,18 @@ class WorkInfo < ApplicationRecord
   def decrypt_ssn
     aes = OpenSSL::Cipher.new(cipher_type)
     aes.decrypt
-    aes.key = key[0..31]
+    aes.key = key
     aes.iv = iv if iv != nil
     aes.update(self.encrypted_ssn) + aes.final
   end
 
   def key
-    raise "Key Missing" unless KEY.present?
+    raise "Key Missing" if !(KEY)
     KEY
   end
 
   def iv
-    raise "No IV for this User" unless self.key_management.try(:iv).present?
+    raise "No IV for this User" if !(self.key_management.iv)
     self.key_management.iv
   end
 
