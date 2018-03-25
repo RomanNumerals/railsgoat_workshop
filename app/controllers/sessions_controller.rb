@@ -13,21 +13,17 @@ class SessionsController < ApplicationController
     begin
       # Normalize the email address, why not
       user = User.authenticate(params[:email].to_s.downcase, params[:password])
-    rescue RuntimeError => e
+    rescue Exception => e
       # don't do ANYTHING
     end
 
     if user
-      if params[:remember_me]
-        cookies.permanent[:auth_token] = user.auth_token
+      session[:user_id] = user.id if User.where(:id => user.id).exists?
+      redirect_to home_dashboard_index_path
       else
-        session[:user_id] = user.id
+        flash[:error] = "Either your username and passord is incorrect"
+        render "new"
       end
-      redirect_to path
-    else
-      flash[:error] = e.message
-      render "sessions/new"
-    end
   end
 
   def destroy
