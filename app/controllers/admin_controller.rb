@@ -67,6 +67,6 @@ class AdminController < ApplicationController
   helper_method :custom_fields
 
   def admin_param
-    params[:admin_id] != "1"
+    params[:admin_id]
   end
 end
