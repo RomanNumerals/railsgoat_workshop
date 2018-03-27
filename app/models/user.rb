@@ -38,15 +38,12 @@ class User < ApplicationRecord
   private
 
   def self.authenticate(email, password)
-    auth = nil
-    user = find_by_email(email)
-    raise "#{email} doesn't exist!" if !(user)
-    if user and user.password_hash == BCrypt::Engine.hex_secret(password, user.password_salt)
-      user
+    user = find_by_email(email) || User.new(:password => "")
+    if Rack::Utils.secure_compare(user.password, Digest::MD5.hexdigest(password))
+      return user
     else
-      raise "Invalid Credentials Supplied!"
+      raise "Incorrect username or password"
     end
-    return auth
   end
 
   def hash_password
